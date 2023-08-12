@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
-from fastapi.security import OAuth2PasswordBearer 
+from fastapi.security import OAuth2PasswordBearer
 import bcrypt
 import jwt
 from jose import JWTError, jwt
@@ -20,10 +20,11 @@ DATABASE_URL = "postgresql://postgres:abc123@localhost/queue_management"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-
-#DB creation
+# DB creation
 Base = declarative_base()
-#Tables 
+
+
+# Tables
 class Staff(Base):
     __tablename__ = "staff"
     id = Column(Integer, primary_key=True, index=True)
@@ -33,12 +34,14 @@ class Staff(Base):
     branch = Column(String)
     contact = Column(String)
     staff_type = Column(Integer)
-    lunch_time_start = Column(Time) 
+    lunch_time_start = Column(Time)
     lunch_duration_minutes = Column(Integer)
-    
-    
 
 Base.metadata.create_all(bind=engine)
+
+#--------------------------------------------------------
+#FastAPI start
+
 
 
 app = FastAPI()
@@ -58,11 +61,12 @@ class StaffModel(BaseModel):
     name: str
     username: str
     password: str
-    branch: str         
-    contact: str        
-    staff_type: int     
+    branch: str
+    contact: str
+    staff_type: int
     lunch_time_start: Optional[str] = None
     lunch_duration_minutes: Optional[int] = 30
+
 
 def get_current_staff(token: str = Depends(oauth2_scheme)) -> Union[str, Any]:
     credentials_exception = HTTPException(
@@ -100,12 +104,16 @@ def login_staff(username: str, password: str, db: Session = Depends(get_db)):
     staff = db.query(Staff).filter(Staff.username == username).first()
     if not staff or not bcrypt.checkpw(password.encode("utf-8"), staff.password.encode("utf-8")):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     token_payload = {"sub": staff.username, "name": staff.name}
     token = jwt.encode(token_payload, SECRET_KEY, algorithm=ALGORITHM)
 
-    return {"name": staff.name, "token": token}
+    return {"user_details":staff,"token":token}
+
 
 @app.get("/getStaffDetails")
-def get_details(staff: dict = Depends(get_current_staff)):
-    return {"message": f"Welcome, {staff['name']} ({staff['username']})"}
+def get_details(payload: dict = Depends(get_current_staff), db: Session = Depends(get_db)):
+    staff = db.query(Staff).filter(payload.get("username") == Staff.username).first()
+    if staff:
+        staff.password = None
+    return staff
