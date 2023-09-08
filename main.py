@@ -33,7 +33,7 @@ class Staff(Base):
     password = Column(String)
     branch = Column(String)
     contact = Column(String)
-    staff_type = Column(Integer)
+    role_type = Column(Integer)
     lunch_time_start = Column(Time)
     lunch_duration_minutes = Column(Integer)
 
@@ -63,7 +63,7 @@ class StaffModel(BaseModel):
     password: str
     branch: str
     contact: str
-    staff_type: int
+    role_type: int
     lunch_time_start: Optional[str] = None
     lunch_duration_minutes: Optional[int] = 30
 
