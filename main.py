@@ -34,8 +34,6 @@ class Staff(Base):
     branch = Column(String)
     contact = Column(String)
     role_type = Column(Integer)
-    lunch_time_start = Column(Time)
-    lunch_duration_minutes = Column(Integer)
 
 Base.metadata.create_all(bind=engine)
 
@@ -64,8 +62,6 @@ class StaffModel(BaseModel):
     branch: str
     contact: str
     role_type: int
-    lunch_time_start: Optional[str] = None
-    lunch_duration_minutes: Optional[int] = 30
 
 
 def get_current_staff(token: str = Depends(oauth2_scheme)) -> Union[str, Any]:
@@ -89,8 +85,8 @@ def create_staff(staff: StaffModel, db: Session = Depends(get_db)):
         hashed_password = bcrypt.hashpw(staff.password.encode("utf-8"), bcrypt.gensalt())
         decoded_password = hashed_password.decode('utf-8')
         db_staff = Staff(name=staff.name, username=staff.username, password=decoded_password,
-                         branch=staff.branch, contact=staff.contact, staff_type=staff.staff_type,
-                         lunch_time_start=staff.lunch_time_start, lunch_duration_minutes=staff.lunch_duration_minutes)
+                         branch=staff.branch, contact=staff.contact, role_type=staff.role_type,
+                        )
         db.add(db_staff)
         db.commit()
         db.refresh(db_staff)
