@@ -36,7 +36,7 @@ class Staff(Base):
     role_type = Column(Integer)
 
 class RoleType(Base):
-    __tablename = "role_type"
+    __tablename__ = "role_type"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
 
