@@ -35,6 +35,11 @@ class Staff(Base):
     contact = Column(String)
     role_type = Column(Integer)
 
+class RoleType(Base):
+    __tablename = "role_type"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+
 Base.metadata.create_all(bind=engine)
 
 #--------------------------------------------------------
@@ -62,6 +67,9 @@ class StaffModel(BaseModel):
     branch: str
     contact: str
     role_type: int
+
+class RoleType(BaseModel):
+    name:str
 
 
 def get_current_staff(token: str = Depends(oauth2_scheme)) -> Union[str, Any]:
